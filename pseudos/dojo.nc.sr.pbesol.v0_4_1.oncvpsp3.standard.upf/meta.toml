@@ -1,0 +1,8 @@
+family       = "dojo"
+type         = "nc"
+relativistic = "sr"
+functional   = "pbesol"
+version      = "0.4.1"
+program      = "oncvpsp3"
+extra        = ["standard", ]
+extension    = "upf"

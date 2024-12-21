@@ -1,0 +1,3 @@
+Ecut_low  = 14
+Ecut      = 18  # Normal and recommended
+Ecut_high = 24
