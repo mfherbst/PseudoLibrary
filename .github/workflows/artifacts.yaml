@@ -7,6 +7,9 @@ on:
     tags: ['v*']
   pull_request:
 
+permissions:
+  contents: write
+
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
