@@ -80,7 +80,7 @@ end
 
 function main(pseudopath, output)
     version = determine_version()
-    @info "Determined release version: $version"
+    @info "Determined pseudolibrary release: $version"
 
     folders = pseudo_folders(pseudopath)
     @info "Found pseudo folders:" folders
@@ -113,9 +113,9 @@ function main(pseudopath, output)
             "sha256" => bytes2hex(open(sha256, targetfile))
         )]
 
+        meta["pseudolibrary_version"] = version
         artifacts[name] = meta
     end
-    artifacts["version"] = version
 
     @info "Generating $(joinpath(output, "Artifacts.toml"))"
     open(joinpath(output, "Artifacts.toml"), "w") do io
