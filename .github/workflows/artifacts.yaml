@@ -42,7 +42,7 @@ jobs:
             output/*.tar.gz
             output/Artifacts.toml
           retention-days: 1
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
