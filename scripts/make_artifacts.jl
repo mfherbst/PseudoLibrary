@@ -104,6 +104,4 @@ function main(pseudopath, output)
     end
 end
 
-function main()
-    main(ARGS[1], ARGS[2])
-end
+(abspath(PROGRAM_FILE) == @__FILE__) && main(ARGS[1], ARGS[2])
