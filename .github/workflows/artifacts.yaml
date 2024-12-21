@@ -1,0 +1,37 @@
+name: Artifact
+on:
+  push:
+    branches:
+      - master
+    tags: ['*']
+  pull_request:
+concurrency:
+  # Skip intermediate builds: always.
+  # Cancel intermediate builds: only if it is a pull request build.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  artifact:
+    name: Artifact build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Julia stable
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+          arch: x64
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+        with:
+          project: "scripts"
+      - run: julia --color=yes --project=scripts scripts/make_artifacts.jl pseudos output
+      - name: Upload Artifactfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifact
+          path: output/Artifacts.toml
+          retention-days: 1
