@@ -1,10 +1,11 @@
+using Inflate
+using LibGit2
+using PeriodicTable
+using SHA
 using Tar
 using TOML
-using PeriodicTable
-using Inflate
-using SHA
 
-BASEURL = "https://github.com/JuliaMolSim/PseudoLibrary/raw/main/artifacts/"
+REPO = "mfherbst/PseudoLibrary"
 KNOWN_FUNCTIONALS = ["pbe", "lda", "pbesol"]
 KNOWN_EXTENSIONS  = ["xml", "upf", "hgh", "psp8"]
 
@@ -63,13 +64,27 @@ function pseudo_folders(path)
     [root for (root, dirs, files) in walkdir(path) if "meta.toml" in files]
 end
 
+function determine_version()
+    is_ci_run_for_tag = startswith(get(ENV, "GITHUB_EVENT_NAME", ""), "refs/tags")
+    if is_ci_run_for_tag
+        @assert startswith(ENV["GITHUB_REF_NAME"], "v")
+        version_from_tag = ENV["GITHUB_REF_NAME"][2:end]
+        return version_from_tag
+    else
+        return "0.0.0"
+    end
+end
+
 function main(pseudopath, output)
-    @assert isdir(pseudopath)
-    @assert !isdir(output)
-    mkpath(output)
+    version = determine_version()
+    @info "Determined release version: $version"
 
     folders = pseudo_folders(pseudopath)
     @info "Found pseudo folders:" folders
+
+    @assert isdir(pseudopath)
+    @assert !isdir(output)
+    mkpath(output)
 
     artifacts = Dict{String,Any}()
     for folder in folders
@@ -91,12 +106,13 @@ function main(pseudopath, output)
         meta["git-tree-sha1"] = Tar.tree_hash(IOBuffer(inflate_gzip(targetfile)))
         meta["lazy"] = true
         meta["download"] = [Dict(
-            "url" => "$BASEURL/$name.tar.gz",
+            "url" => "https://github.com/$REPO/releases/download/v$version/$name.tar.gz",
             "sha256" => bytes2hex(open(sha256, targetfile))
         )]
 
         artifacts[name] = meta
     end
+    artifacts["version"] = version
 
     @info "Generating $(joinpath(output, "Artifacts.toml"))"
     open(joinpath(output, "Artifacts.toml"), "w") do io
@@ -104,6 +120,4 @@ function main(pseudopath, output)
     end
 end
 
-function main()
-    main(ARGS[1], ARGS[2])
-end
+(abspath(PROGRAM_FILE) == @__FILE__) && main(ARGS[1], ARGS[2])
