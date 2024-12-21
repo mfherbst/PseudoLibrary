@@ -5,7 +5,6 @@ using SHA
 using Tar
 using TOML
 
-LIBRARY_VERSION = "0.0.1"
 REPO = "mfherbst/PseudoLibrary"
 KNOWN_FUNCTIONALS = ["pbe", "lda", "pbesol"]
 KNOWN_EXTENSIONS  = ["xml", "upf", "hgh", "psp8"]
@@ -69,13 +68,10 @@ function determine_version()
     is_ci_run_for_tag = startswith(get(ENV, "GITHUB_EVENT_NAME", ""), "refs/tags")
     if is_ci_run_for_tag
         @assert startswith(ENV["GITHUB_REF_NAME"], "v")
-        version_from_tag = ENV["GITHUB_REF_NAME"][2:]
-        if version_from_tag != LIBRARY_VERSION
-            error("Tag version and expected library version do not agree.")
-        end
+        version_from_tag = ENV["GITHUB_REF_NAME"][2:end]
         return version_from_tag
     else
-        return LIBRARY_VERSION
+        return "0.0.0"
     end
 end
 
